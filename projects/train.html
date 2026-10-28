@@ -49,13 +49,11 @@
     <button id="undo">Undo</button>
     <button id="dl">Runterladen</button>
   </div>
-  <div id="counts">X: 0 &nbsp; O: 0 &nbsp; neither: 0 &nbsp; (0 total)</div>
+  <div id="counts">X: 0 &nbsp; O: 0 &nbsp; kein: 0 &nbsp; (0 total)</div>
   <div id="thumbWrap">
     <canvas id="thumb" width="20" height="20"></canvas>
     <div class="hint">20&times;20 grid the network sees</div>
   </div>
-  <p><a href="/">&larr; back to classifier</a></p>
-  <div class="keys">keys: X / O / N to label &nbsp;&middot;&nbsp; C to clear &nbsp;&middot;&nbsp; U to undo</div>
 </div>
 <script>
   var C = document.getElementById('canvas');
@@ -90,7 +88,7 @@
     if (!drawing) return; e.preventDefault(); var p = pos(e);
     line(lx, ly, p.x, p.y); lx = p.x; ly = p.y;
   });
-  function endDraw() { if (drawing) { drawing = false; classify(); } }
+  function endDraw() { if (drawing) { drawing = false; } }
   C.addEventListener('pointerup', endDraw);
   C.addEventListener('pointercancel', endDraw);
   C.addEventListener('pointerleave', endDraw);
@@ -141,11 +139,11 @@
   function save(label) {
     var g = downsample();
     var black = 0; for (var i = 0; i < 400; i++) black += g[i];
-    if (black < 3) { document.getElementById('guess').textContent = 'Canvas is empty &mdash; draw something first.'; return; }
+    if (black < 3) { document.getElementById('guess').textContent = 'Canvas ist leer, zeiche etwas zuerst'; return; }
     samples.push({ grid: g, label: label });
     updateCounts();
     clearCanvas();
-    document.getElementById('guess').textContent = 'Saved (' + samples.length + ' total). Draw the next one.';
+    document.getElementById('guess').textContent = 'Gespeichert (' + samples.length + ' total).';
   }
 
   function updateCounts() {
@@ -162,21 +160,21 @@
   document.getElementById('bo').onclick = function() { save(1); };
   document.getElementById('bn').onclick = function() { save(2); };
   document.getElementById('clr').onclick = function() {
-    clearCanvas(); document.getElementById('guess').textContent = 'Cleared. Draw something.';
+    clearCanvas(); document.getElementById('guess').textContent = 'Sauber. Zeiche etwas.';
   };
   document.getElementById('undo').onclick = function() {
     if (samples.length) { samples.pop(); updateCounts();
       document.getElementById('guess').textContent = 'Undid last (' + samples.length + ' left).'; }
   };
   document.getElementById('dl').onclick = function() {
-    if (!samples.length) { document.getElementById('guess').textContent = 'No samples yet &mdash; draw and label some first.'; return; }
+    if (!samples.length) { document.getElementById('guess').textContent = 'Keine Beispiele soweit. Zeiche etwas.'; return; }
     var data = { format: 'xo-dataset-v1', grid_side: 20, samples: samples };
     var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'xo_dataset.json';
     a.click();
-    document.getElementById('guess').textContent = 'Downloaded ' + samples.length + ' samples. Run: python train_model.py xo_dataset.json';
+    document.getElementById('guess').textContent = samples.length + ' Beispiele runtergeladen.';
   };
 
   document.addEventListener('keydown', function(e) {
@@ -185,7 +183,7 @@
     if (k === 'x') save(0);
     else if (k === 'o') save(1);
     else if (k === 'n') save(2);
-    else if (k === 'c') { clearCanvas(); document.getElementById('guess').textContent = 'Cleared.'; }
+    else if (k === 'c') { clearCanvas(); document.getElementById('guess').textContent = 'Sauber.'; }
     else if (k === 'u') {
       if (samples.length) { samples.pop(); updateCounts();
         document.getElementById('guess').textContent = 'Undid last.'; }
